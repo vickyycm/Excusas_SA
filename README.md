@@ -1,121 +1,124 @@
-
 # 🏢 Excusas S.A. — Sistema de Gestión de Excusas
 
 Sistema desarrollado en Java para automatizar la gestión de excusas por llegadas tarde dentro de una empresa ficticia. Las excusas atraviesan distintos sectores organizacionales hasta que un responsable las procesa o se determina su rechazo.
 
-El proyecto fue realizado en el marco de un **parcial de Diseño de Sistemas de Software**, aplicando principios de Programación Orientada a Objetos, patrones de diseño y buenas prácticas de desarrollo.
+El proyecto fue realizado en el marco de un **parcial de Diseño de Sistemas de Software**, aplicando programación orientada a objetos, patrones de diseño y desarrollo guiado por pruebas (TDD).
 
 ## 🎯 Objetivo
 
-Diseñar e implementar un sistema flexible y desacoplado que permita gestionar excusas laborales mediante una cadena configurable de responsables, cada uno con criterios específicos para evaluar los motivos presentados.
+Diseñar e implementar un sistema flexible y desacoplado que permita gestionar excusas laborales mediante una cadena configurable de encargados, cada uno responsable de un tipo de excusa.
 
-La solución contempla distintos niveles organizacionales, el envío de notificaciones por email, la generación de prontuarios y la posibilidad de modificar temporalmente el comportamiento de los responsables según su desempeño laboral.
+La solución contempla distintos niveles organizacionales, el envío de notificaciones por email, la generación de prontuarios y la posibilidad de modificar el comportamiento de los encargados según su desempeño laboral.
+
+## 📏 Reglas de diseño
+
+- **Todas las clases implementan una interfaz.**
+- **Sin `if`, `else` ni `instanceof`** en el código del sistema: las decisiones se resuelven con polimorfismo, doble despacho y tablas.
+- **Todo orientado a objetos:** cada objeto decide lo que le corresponde (*Tell, Don't Ask*).
 
 ## ⚙️ Funcionalidades principales
 
-- **Gestión de excusas:** registro del empleado, el motivo de la demora y el estado de aceptación.
-- **Procesamiento por sectores:** cada responsable evalúa si puede procesar una excusa o si debe derivarla.
-- **Cadena organizacional configurable:** permite definir el orden en el que intervienen los responsables.
-- **Notificaciones por email:** envío de mensajes según el motivo de la excusa y la decisión del responsable.
-- **Administración de prontuarios:** centralización de los registros especiales generados por determinadas decisiones.
-- **Comportamientos dinámicos:** modificación del desempeño de los responsables entre los modos productivo, normal y vago.
-- **Pruebas automatizadas:** utilización de JUnit 5 para verificar los comportamientos del sistema.
+- **Tipos de excusa:** trivial, moderada (corte de luz o cuidado familiar), compleja e inverosímil.
+- **Procesamiento por sectores:** recepcionista, supervisora de área, gerente de RRHH y CEO.
+- **Cadena configurable:** el orden de los encargados se define al armar la línea.
+- **Rechazo final:** si nadie la procesa, la excusa se rechaza con *"Excusa rechazada: necesitamos pruebas contundentes"*.
+- **Notificaciones por email:** al empleado, a EDESUR o al CTO, según el caso.
+- **Prontuarios:** el CEO genera un prontuario por cada excusa inverosímil aceptada, y se informa al equipo de dirección.
+- **Modos de desempeño:** productivo, normal o vago, con cambios por café, break, cantidad de excusas procesadas y día siguiente.
 
 ## 🧠 Patrones de diseño
 
-### Chain of Responsibility
+### Builder (tipos de excusa)
+Una `Excusa` tiene un `TipoExcusa` (`Trivial`, `Moderada` → `CorteLuz` / `CuidadoFamiliar`, `Compleja`, `Inverosimil`). Cada tipo sabe qué método del encargado invocar (**doble despacho**), así ningún encargado pregunta de qué tipo es la excusa.
 
-Permite que una excusa pase de un responsable al siguiente hasta encontrar uno que pueda procesarla. La cadena es configurable para modificar el orden de intervención e incorporar nuevos responsables sin tener que modificar la lógica de los existentes.
+### Chain of Responsibility
+`Encargado` implementa `EncargadoI` y conoce a su `siguiente`. Por defecto, todo encargado deriva; cada uno sobrescribe solo el tipo de excusa que le corresponde. El último eslabón es siempre un `Rechazador`, que evita preguntar si hay siguiente. `EncargadoI` cumple el rol de *ExcusaController* con el método `manejar(excusa)`.
+
+### Builder (línea de encargados)
+`Constructor` (que implementa `LineaBuild`) arma la `LineaDeEncargados` en el orden indicado y coloca el `Rechazador` al final:
+
+```java
+new Constructor()
+        .agregar(recepcionista)
+        .agregar(ceo)
+        .construir()
+        .manejar(excusa);
+```
+
+### Template Method
+`Encargado.procesar(excusa)` fija los pasos: aceptar → `notificar` → `registrar` → contar la excusa. Cada encargado completa `notificar`, y solo el CEO sobrescribe el gancho `registrar` para generar el prontuario.
 
 ### Strategy
+Cada encargado tiene un `Delivery` con su `Modo` actual:
+- **Productivo:** evalúa la excusa y, si no puede, avisa al CTO antes de derivarla.
+- **Normal:** evalúa la excusa y, si no puede, la deriva.
+- **Vago:** no la evalúa y la deriva directamente.
 
-Permite representar los distintos modos de desempeño laboral de los responsables:
-
-- **Productivo:** evalúa la excusa y, si no puede procesarla, la deriva después de notificar al CTO.
-- **Normal:** actúa según el comportamiento esperado de su rol.
-- **Vago:** no evalúa la excusa y la deriva al siguiente responsable.
-
-Este patrón permite agregar nuevos modos de desempeño sin modificar la lógica central de los responsables.
-
-### Observer
-
-Permite notificar a otros componentes cuando ocurre un evento relevante en el sistema. Se aplica a la necesidad de mantener informado al equipo de dirección cuando se genera un nuevo prontuario, evitando que el administrador tenga que conocer directamente a todos los interesados en recibir las notificaciones.
+Los cambios de modo se resuelven sin condicionales: una lista indexada por cantidad de excusas procesadas (menos de 5 → Productivo, 5 a 10 → Normal, 11 o más → Vago), un mapa de minutos válidos para el break (10 a 15) y un `Azar` para el 50% del día siguiente.
 
 ### Singleton
+`AdministradorProntuario` tiene una única instancia que centraliza la persistencia de los prontuarios y evita inconsistencias.
 
-Permite garantizar una única instancia compartida de un componente que centraliza una responsabilidad. En este proyecto, se utiliza para representar la centralización de la gestión de prontuarios mediante un administrador específico, evitando inconsistencias en los registros.
+### Observer
+`AdministradorProntuario` implementa `Observable`: al persistir un prontuario notifica a los `Observador` registrados (`EquipoDireccion` y `CEO`), sin conocer sus detalles.
 
-## 🎮 Excusa Controller
+## 🧩 Principios aplicados
 
-La interfaz `ExcusaController`, con el método `manejar(excusa)`, define un punto de entrada para iniciar el procesamiento de una excusa sin acoplar al cliente con los detalles internos de la cadena de responsables.
+- **Open/Closed:** se pueden agregar encargados, tipos de excusa y modos sin modificar los existentes.
+- **Tell, Don't Ask** y **polimorfismo** en lugar de condicionales.
+- **Bajo acoplamiento:** las dependencias apuntan a interfaces, lo que permite reemplazarlas por mocks en los tests.
+- **DRY:** el Template Method concentra el procesamiento común de todos los encargados.
 
-Esta abstracción facilita la separación entre quien solicita el procesamiento y los componentes que se encargan de resolverlo.
+## 🛠️ Tecnologías
 
-## 🧩 Principios de diseño aplicados
-
-- **SOLID:** separación de responsabilidades, abstracciones e independencia entre componentes.
-- **Open/Closed Principle:** posibilidad de agregar nuevos responsables y modos de desempeño sin modificar el comportamiento existente.
-- **Tell, Don't Ask:** delegación de decisiones en los objetos responsables de ejecutarlas.
-- **DRY (Don't Repeat Yourself):** reducción de lógica duplicada mediante abstracciones y reutilización de comportamiento.
-- **Bajo acoplamiento:** uso de interfaces para facilitar la extensión y las pruebas.
-- **Polimorfismo:** cada responsable y modo de desempeño define su comportamiento particular.
-
-## 🛠️ Tecnologías utilizadas
-
-- **Java 17:** lenguaje de programación.
-- **Apache Maven:** gestión del proyecto y sus dependencias.
-- **JUnit 5:** desarrollo y ejecución de pruebas automatizadas.
-- **Programación Orientada a Objetos:** organización del sistema mediante clases, interfaces y polimorfismo.
-- **Git y GitHub:** control de versiones y alojamiento del código fuente.
+- **Java 17**
+- **Apache Maven**
+- **JUnit 5**
+- **Mockito** (mocks de las interfaces en los tests)
+- **Git y GitHub**
 
 ## 🧪 Pruebas
 
-El proyecto contempla el enfoque **Test-Driven Development (TDD)** y el uso de pruebas automatizadas para verificar el comportamiento del sistema.
+Desarrollado con **TDD**: **95 tests** con `@DisplayName` numerados (T01 a T76, más un test parametrizado de 20 combinaciones encargado × tipo de excusa). Cobertura de líneas: **92%**.
 
-Entre los comportamientos relevantes para probar se encuentran:
+Cubren, entre otros:
+- La excusa y sus tipos (doble despacho).
+- Qué acepta cada encargado y qué deriva.
+- El rechazo al final de la cadena.
+- Los emails enviados en cada caso.
+- El armado y el orden configurable de la línea.
+- Los modos de desempeño y sus transiciones.
+- El Singleton, los prontuarios y los avisos a los observadores.
 
-- Aceptación de excusas por el responsable correspondiente.
-- Derivación de excusas al siguiente sector.
-- Rechazo cuando ningún responsable puede procesar una excusa.
-- Envío de emails según el tipo de excusa.
-- Generación y administración de prontuarios.
-- Cambios de comportamiento según el modo de desempeño.
-- Configuración del orden de los responsables.
-- Incorporación de nuevos responsables y estrategias.
+## 🚀 Cómo ejecutar
 
-## 🚀 Cómo ejecutar el proyecto
-
-### Requisitos previos
-
-- JDK 17 o superior.
-- Apache Maven.
-- Un IDE compatible con proyectos Java, como IntelliJ IDEA.
+### Requisitos
+- JDK 17 o superior (recomendado 21)
+- Apache Maven
+- IntelliJ IDEA u otro IDE para Java
 
 ### Clonar el repositorio
-
 ```bash
-git clone https://github.com/vickyycm/Excusas.git
-cd Excusas
+git clone https://github.com/vickyycm/Excusas_SA.git
+cd Excusas_SA
 ```
 
 ### Ejecutar las pruebas
-
 ```bash
 mvn test
 ```
 
-### Compilar el proyecto
+### Ejecutar la demo
+Correr la clase `ar.edu.davinci.Main`, que muestra por consola el recorrido de distintas excusas por la cadena.
 
-```bash
-mvn clean package
-```
+## 📐 Diagrama UML
+
+El diagrama de clases, con los patrones señalados, se encuentra en `docs/UML.png`.
 
 ## 🎓 Contexto académico
 
-Proyecto desarrollado para un parcial de **Diseño de Sistemas de Software**, con foco en el diseño orientado a objetos, los patrones de diseño, los principios SOLID y las pruebas automatizadas.
-
-La propuesta busca resolver un problema de negocio mediante una arquitectura extensible, mantenible y desacoplada, preparada para incorporar nuevos responsables y comportamientos sin rediseñar el sistema completo.
+Proyecto desarrollado para un parcial de **Diseño de Sistemas de Software**, con foco en diseño orientado a objetos, patrones de diseño y pruebas automatizadas.
 
 ---
 
-**Repositorio:** [github.com/vickyycm/Excusas](https://github.com/vickyycm/Excusas)
+**Repositorio:** [github.com/vickyycm/Excusas_SA](https://github.com/vickyycm/Excusas_SA)
