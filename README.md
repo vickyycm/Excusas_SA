@@ -10,12 +10,6 @@ Diseñar e implementar un sistema flexible y desacoplado que permita gestionar e
 
 La solución contempla distintos niveles organizacionales, el envío de notificaciones por email, la generación de prontuarios y la posibilidad de modificar el comportamiento de los encargados según su desempeño laboral.
 
-## 📏 Reglas de diseño
-
-- **Todas las clases implementan una interfaz.**
-- **Sin `if`, `else` ni `instanceof`** en el código del sistema: las decisiones se resuelven con polimorfismo, doble despacho y tablas.
-- **Todo orientado a objetos:** cada objeto decide lo que le corresponde (*Tell, Don't Ask*).
-
 ## ⚙️ Funcionalidades principales
 
 - **Tipos de excusa:** trivial, moderada (corte de luz o cuidado familiar), compleja e inverosímil.
@@ -62,13 +56,6 @@ Los cambios de modo se resuelven sin condicionales: una lista indexada por canti
 ### Observer
 `AdministradorProntuario` implementa `Observable`: al persistir un prontuario notifica a los `Observador` registrados (`EquipoDireccion` y `CEO`), sin conocer sus detalles.
 
-## 🧩 Principios aplicados
-
-- **Open/Closed:** se pueden agregar encargados, tipos de excusa y modos sin modificar los existentes.
-- **Tell, Don't Ask** y **polimorfismo** en lugar de condicionales.
-- **Bajo acoplamiento:** las dependencias apuntan a interfaces, lo que permite reemplazarlas por mocks en los tests.
-- **DRY:** el Template Method concentra el procesamiento común de todos los encargados.
-
 ## 🛠️ Tecnologías
 
 - **Java 17**
@@ -90,30 +77,6 @@ Cubren, entre otros:
 - Los modos de desempeño y sus transiciones.
 - El Singleton, los prontuarios y los avisos a los observadores.
 
-## 🚀 Cómo ejecutar
-
-### Requisitos
-- JDK 17 o superior (recomendado 21)
-- Apache Maven
-- IntelliJ IDEA u otro IDE para Java
-
-### Clonar el repositorio
-```bash
-git clone https://github.com/vickyycm/Excusas_SA.git
-cd Excusas_SA
-```
-
-### Ejecutar las pruebas
-```bash
-mvn test
-```
-
-### Ejecutar la demo
-Correr la clase `ar.edu.davinci.Main`, que muestra por consola el recorrido de distintas excusas por la cadena.
-
-## 📐 Diagrama UML
-
-El diagrama de clases, con los patrones señalados, se encuentra en `docs/UML.png`.
 
 ## 🎓 Contexto académico
 
