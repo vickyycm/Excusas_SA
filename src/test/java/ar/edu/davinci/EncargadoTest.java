@@ -18,8 +18,6 @@ class EncargadoTest {
         email = mock(Email.class);
     }
 
-    // ----- Recepcionista -----
-
     @Test
     @DisplayName("T17 La recepcionista acepta una excusa trivial")
     void t17_recepcionistaAceptaTrivial() {
@@ -50,8 +48,6 @@ class EncargadoTest {
 
         verify(siguiente).manejar(excusa);
     }
-
-    // ----- Supervisora -----
 
     @Test
     @DisplayName("T20 La supervisora acepta un corte de luz y consulta a EDESUR")
@@ -85,7 +81,6 @@ class EncargadoTest {
         assertFalse(excusa.estaAceptada());
     }
 
-    // ----- Gerente -----
 
     @Test
     @DisplayName("T23 El gerente de RRHH acepta una excusa compleja")
@@ -104,8 +99,6 @@ class EncargadoTest {
 
         verifyNoInteractions(email);
     }
-
-    // ----- CEO -----
 
     @Test
     @DisplayName("T25 El CEO acepta una excusa inverosímil")
@@ -135,7 +128,6 @@ class EncargadoTest {
         assertFalse(excusa.estaAceptada());
     }
 
-    // ----- Fin de la cadena -----
 
     @Test
     @DisplayName("T28 Si nadie más la toma, la excusa queda rechazada")
@@ -147,7 +139,6 @@ class EncargadoTest {
         assertEquals(Rechazador.MENSAJE_RECHAZO, excusa.getRespuesta());
     }
 
-    // ----- Template Method y delegación -----
 
     @Test
     @DisplayName("T29 Procesar acepta la excusa antes de notificar")
@@ -185,7 +176,6 @@ class EncargadoTest {
         verify(delivery).entregar(recepcionista, excusa);
     }
 
-    // ----- Ayudas -----
 
     private Encargado recepcionista() {
         return new Recepcionista("Ana", "ana@excusas.com", 2001, email, new Delivery(new Normal()));

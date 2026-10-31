@@ -99,8 +99,6 @@ class LineaDeEncargadosTest {
         assertEquals(Rechazador.MENSAJE_RECHAZO, excusa.getRespuesta());
     }
 
-    // ----- Ayudas -----
-
     private LineaDeEncargadosI lineaCompleta() {
         return new Constructor()
                 .agregar(recepcionista())

@@ -26,14 +26,11 @@ class ProntuarioTest {
         administrador.agregarObservador(direccion);
     }
 
-    // El Singleton vive durante todos los tests: al terminar, sacamos lo que agregamos
     @AfterEach
     void limpiar() {
         administrador.eliminarObservador(observador);
         administrador.eliminarObservador(direccion);
     }
-
-    // ----- Singleton -----
 
     @Test
     @DisplayName("T66 El administrador de prontuarios es único")
@@ -50,8 +47,6 @@ class ProntuarioTest {
 
         assertEquals(antes + 1, administrador.cantidadProntuarios());
     }
-
-    // ----- Observer -----
 
     @Test
     @DisplayName("T68 Al persistir un prontuario se avisa a los observadores")
@@ -82,8 +77,6 @@ class ProntuarioTest {
         assertEquals(1, direccion.cantidadAvisosRecibidos());
     }
 
-    // ----- Prontuario -----
-
     @Test
     @DisplayName("T71 El prontuario guarda el empleado, la excusa y el legajo")
     void t71_datosDelProntuario() {
@@ -96,8 +89,6 @@ class ProntuarioTest {
         assertSame(excusa, prontuario.getExcusa());
         assertEquals(1001, prontuario.getNroLegajo());
     }
-
-    // ----- CEO -----
 
     @Test
     @DisplayName("T72 Cuando el CEO acepta una excusa se genera un prontuario")
@@ -158,8 +149,6 @@ class ProntuarioTest {
         assertTrue(excusa.estaAceptada());
         assertEquals(1, direccion.cantidadAvisosRecibidos());
     }
-
-    // ----- Ayudas -----
 
     private CEO ceo() {
         return new CEO("Marta", "marta@excusas.com", 2004, email, new Delivery(new Normal()));

@@ -153,8 +153,6 @@ class DeliveryTest {
         verify(delivery).volverAlDiaSiguiente();
     }
 
-    // ----- Ayudas -----
-
     private DeliveryI procesar(int cantidad) {
         DeliveryI delivery = new Delivery(new Productivo());
         for (int i = 0; i < cantidad; i++) {

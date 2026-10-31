@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-// Cada encargado contra cada tipo de excusa: acepta solo la suya y rechaza el resto.
 class MatrizEncargadosTest {
 
     @ParameterizedTest(name = "T42 {0} con excusa {1} → aceptada: {2}")

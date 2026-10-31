@@ -18,8 +18,6 @@ class ModoTest {
         email = mock(Email.class);
     }
 
-    // ----- Productivo -----
-
     @Test
     @DisplayName("T43 En modo productivo acepta la excusa que le corresponde")
     void t43_productivoAcepta() {
@@ -50,8 +48,6 @@ class ModoTest {
 
         verify(siguiente).manejar(excusa);
     }
-
-    // ----- Vago -----
 
     @Test
     @DisplayName("T46 En modo vago no evalúa la excusa aunque pudiera resolverla")
@@ -84,8 +80,6 @@ class ModoTest {
         verifyNoInteractions(email);
     }
 
-    // ----- Normal -----
-
     @Test
     @DisplayName("T49 En modo normal deriva sin avisar al CTO")
     void t49_normalNoAvisaAlCto() {
@@ -93,8 +87,6 @@ class ModoTest {
 
         verifyNoInteractions(email);
     }
-
-    // ----- Ayudas -----
 
     private Encargado recepcionista(Modo modo) {
         return new Recepcionista("Ana", "ana@excusas.com", 2001, email, new Delivery(modo));
