@@ -26,7 +26,7 @@ La solución contempla distintos niveles organizacionales, el envío de notifica
 Una `Excusa` tiene un `TipoExcusa` (`Trivial`, `Moderada` → `CorteLuz` / `CuidadoFamiliar`, `Compleja`, `Inverosimil`). Cada tipo sabe qué método del encargado invocar (**doble despacho**), así ningún encargado pregunta de qué tipo es la excusa.
 
 ### Chain of Responsibility
-`Encargado` implementa `EncargadoI` y conoce a su `siguiente`. Por defecto, todo encargado deriva; cada uno sobrescribe solo el tipo de excusa que le corresponde. El último eslabón es siempre un `Rechazador`, que evita preguntar si hay siguiente. `EncargadoI` cumple el rol de *ExcusaController* con el método `manejar(excusa)`.
+`Encargado` implementa `EncargadoI` y conoce a su `siguiente`. Por defecto, todo encargado deriva; cada uno sobrescribe solo el tipo de excusa que le corresponde. El último eslabón es siempre un `Rechazador`, que evita preguntar si hay siguiente. 
 
 ### Builder (línea de encargados)
 `Constructor` (que implementa `LineaBuild`) arma la `LineaDeEncargados` en el orden indicado y coloca el `Rechazador` al final:
